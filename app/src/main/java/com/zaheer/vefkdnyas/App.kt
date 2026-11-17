@@ -96,6 +96,11 @@ fun App(modifier: Modifier = Modifier) {
     val scrollState = rememberScrollState()
     var result by remember { mutableStateOf(listOf<String>()) }
     var isArabic by remember { mutableStateOf(sharedPref.getBoolean("isArabic", false)) }
+    var naqashType by remember {
+        mutableStateOf(
+            sharedPref.getString("naqashType", "Textual") ?: "Textual"
+        )
+    }
 //و ا ح
     val space = 16.dp
     Column(modifier = modifier) {
@@ -126,37 +131,55 @@ fun App(modifier: Modifier = Modifier) {
                 .padding(10.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-
-            ExposedDropdownMenuBox(
-                expanded = expanded,
-                onExpandedChange = { expanded = !expanded }
+            //type naqash
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = space),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                OutlinedTextField(
-                    value = dropdownOptions[selectedVefk],
-                    onValueChange = {},
-                    readOnly = true,
-                    label = { Text("Vefk türünü seçin.") },//نقش کی قسم سلیکٹ کرو
-                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-                    modifier = Modifier
-                        .menuAnchor()
-                        .fillMaxWidth()
-                )
-                ExposedDropdownMenu(
+                ExposedDropdownMenuBox(
+                    modifier = Modifier.weight(1f),
                     expanded = expanded,
-                    onDismissRequest = { expanded = false }
+                    onExpandedChange = { expanded = !expanded }
                 ) {
-                    dropdownOptions.forEachIndexed { index, option ->
-                        DropdownMenuItem(
-                            text = { Text(option) },
-                            onClick = {
-                                selectedVefk = index
-                                expanded = false
-                                sharedPref.edit { putInt("saved_Vefk_type", index) }
-                            }
-                        )
+                    OutlinedTextField(
+                        value = dropdownOptions[selectedVefk],
+                        onValueChange = {},
+                        readOnly = true,
+                        label = { Text("Vefk türünü seçin.") },//نقش کی قسم سلیکٹ کرو
+                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+                        modifier = Modifier
+                            .menuAnchor()
+                            .fillMaxWidth()
+                    )
+                    ExposedDropdownMenu(
+                        expanded = expanded,
+                        onDismissRequest = { expanded = false }
+                    ) {
+                        dropdownOptions.forEachIndexed { index, option ->
+                            DropdownMenuItem(
+                                text = { Text(option) },
+                                onClick = {
+                                    selectedVefk = index
+                                    expanded = false
+                                    sharedPref.edit { putInt("saved_Vefk_type", index) }
+                                    showNaqash = false
+                                }
+                            )
+                        }
                     }
-                }
 
+                }
+                NaqshTypeSelector(
+                    modifier = Modifier.weight(1f),
+                    selectedType = naqashType,
+                    onTypeSelected = {
+                        naqashType = it
+                        sharedPref.edit { putString("naqashType", it) }
+                        showNaqash = false
+                    })
             }
             Spacer(modifier = Modifier.height(space))
             ebaraat.forEachIndexed { index, value ->
@@ -166,14 +189,13 @@ fun App(modifier: Modifier = Modifier) {
                         if (newValue.isEmpty() || newValue.all { it in ALPHABET || it == ' ' }) {
                             ebaraat[index] = newValue
                             sharedPref.edit { putString("ebaraat_$index", newValue) }
+                            showNaqash = false
                         }
                     },
                     label = labels[index],
                     modifier = Modifier.fillMaxWidth()
                 )
             }
-
-
             // 2. Arabic Numbers Toggle Row (Replaced Box with a Bordered Row)
             Row(
                 modifier = Modifier
@@ -213,7 +235,7 @@ fun App(modifier: Modifier = Modifier) {
                 // 2. Calculate Button (Given a solid, balanced weight)
                 Button(
                     onClick = {
-                        result = calculateResult(ebaraat, requiredFieldCount, isArabic)
+                        result = calculateResult(ebaraat, requiredFieldCount, naqashType)
                         showNaqash = true
                         keyboardController?.hide()
                     },
@@ -229,7 +251,6 @@ fun App(modifier: Modifier = Modifier) {
             if (showNaqash && result.isNotEmpty()) {
                 CreateNaqoosh(result, isArabic)
             }
-
         }
     }
 }

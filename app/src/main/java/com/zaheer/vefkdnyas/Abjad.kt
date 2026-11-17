@@ -1,5 +1,5 @@
 package com.zaheer.vefkdnyas
-
+//ي ه ك
 private object Abjad : Map<Char, UShort> by mapOf(
     'ا' to 1u,
     'آ' to 1u,
@@ -13,14 +13,17 @@ private object Abjad : Map<Char, UShort> by mapOf(
     'ڈ' to 4u,
     'ہ' to 5u,
     'ھ' to 5u,
+    'ه' to 5u,
     'و' to 6u,
     'ز' to 7u,
     'ژ' to 7u,
     'ح' to 8u,
     'ط' to 9u,
     'ی' to 10u,
+    'ي' to 10u,
     'ے' to 10u,
     'ک' to 20u,
+    'ك' to 20u,
     'گ' to 20u,
     'ل' to 30u,
     'م' to 40u,
@@ -105,11 +108,11 @@ private object Abjad : Map<Char, UShort> by mapOf(
     'Ü' to 800u,
     'V' to 900u,
     'Y' to 1000u,
-    'Z' to 2000u
+    'Z' to 2000u,
 )
 val TURKISH_ALPHABET = "aAbBcCçÇdDeEfFgGğĞhHıIiİjJkKlLmMnNoOöÖpPrRsSşŞtTuUüÜvVyYzZ"
-val URDU_ALPHABET="اآءئبپجچدڈہھوزژحطیےکگلمنںسعفصقرڑشتۃةثخذضظغ"
-val ALPHABET = TURKISH_ALPHABET + URDU_ALPHABET
+val URDU_ALPHABET="اآءئبپجچدڈہھوزژحطیےکگلمنںسعفصقرڑشتۃةثخذضظغيهك"
+val ALPHABET = Abjad.keys + ('0'..'9')
 fun String.calculateAbjadSum(): Int {
     this.toIntOrNull()?.let { return it }
     return this.sumOf { char ->

@@ -24,6 +24,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.zaheer.vefkdnyas.calculateAbjadSum
 import com.zaheer.vefkdnyas.toArabicDigits
+import kotlin.collections.listOf
 import kotlin.random.Random
 
 @Composable
@@ -88,20 +89,31 @@ fun CreateNaqoosh(
 fun calculateResult(
     ebaraat: SnapshotStateList<String>,
     selectedVefk: Int,
-    isArabic: Boolean
+    naqashType: String
+): List<String> {
+    return if (naqashType == "Textual") {
+        calculateResultTextual(ebaraat, selectedVefk)
+    } else {
+        calculateResultZulakitabet(ebaraat, selectedVefk)
+    }
+}
+
+private fun calculateResultZulakitabet(
+    ebaraat: SnapshotStateList<String>,
+    selectedVefk: Int
 ): List<String> {
     // 1. Calculate the sums cleanly in one line
     val orderedEbaraat = ebaraat.reversed()
     val addaadList = orderedEbaraat.map { it.calculateAbjadSum() }
 
 // 2. Initialize resultList with reversed ebaraat and add computed values based on selectedVefk
+
     val resultList = mutableStateListOf<String>().apply {
         addAll(orderedEbaraat)
-
-        when (selectedVefk) {
+        val items = when (selectedVefk) {
             3 -> {
                 // A helper to make adding string conversions cleaner
-                val items = listOf(
+                listOf(
                     addaadList[1] + 2, //3 ------- 3
                     addaadList[2] - 1, //5 ------- 4
                     addaadList[0] - 1, //7 ------- 5
@@ -109,11 +121,10 @@ fun calculateResult(
                     addaadList[0] + 1, //9 ------- 7
                     addaadList[1] + 1  //2 ------- 8
                 )
-                addAll(items.map { it.toString() })
             }
 
             4 -> {
-                val items = listOf(
+                listOf(
                     addaadList[2] - 1,
                     addaadList[3] + 1,
                     addaadList[0] - 1,
@@ -129,11 +140,10 @@ fun calculateResult(
                     addaadList[3] + 3,
                     addaadList[2] + 1,
                 )
-                addAll(items.map { it.toString() })
             }
 
             5 -> {
-                val items = listOf(
+                listOf(
                     addaadList[2] + 1,//20
                     addaadList[3] - 4,//21
                     addaadList[4] + 1,//2
@@ -158,17 +168,58 @@ fun calculateResult(
                     addaadList[1] - 1,//12
                     addaadList[2] - 1,//18
                 )
-                addAll(items.map { it.toString() })
-            }
-        }
 
+            }
+
+            else -> listOf()
+        }
+        addAll(items.map { if (it < 1) "" else it.toString() })
     }
     return resultList
-    /*
-    return if (isArabic)
-        resultList.map { it.toArabicDigits() }
-    else
-        resultList
+}
 
-     */
+private fun calculateResultTextual(
+    ebaraat0: SnapshotStateList<String>,
+    selectedVefk: Int
+): List<String> {
+    val ebaraat = ebaraat0.reversed()
+    val resultList = mutableStateListOf<String>().apply {
+        addAll(ebaraat)
+        val items = when (selectedVefk) {
+            3 -> {
+                listOf(
+                    ebaraat[1], ebaraat[2], ebaraat[0],
+                    ebaraat[2], ebaraat[0], ebaraat[1]
+                )
+            }
+
+            4 -> {
+                listOf(
+                    ebaraat[2], ebaraat[3], ebaraat[0], ebaraat[1],
+                    ebaraat[3], ebaraat[2], ebaraat[1], ebaraat[0],
+                    ebaraat[1], ebaraat[0], ebaraat[3], ebaraat[2],
+                )
+            }
+
+            5 -> {
+                /*
+                4	0	1	2	3
+                0	1	2	3	4
+                1	2	3	4	0
+                2	3	4	0	1
+                * */
+                listOf(
+                    //18,22,1,10,14
+                    ebaraat[1], ebaraat[2], ebaraat[3], ebaraat[4], ebaraat[0],
+                    ebaraat[2], ebaraat[3], ebaraat[4], ebaraat[0], ebaraat[1],
+                    ebaraat[3], ebaraat[4], ebaraat[0], ebaraat[1], ebaraat[2],
+                    ebaraat[4], ebaraat[0], ebaraat[1], ebaraat[2], ebaraat[3],
+                )
+            }
+
+            else -> listOf()
+        }
+        addAll(items)
+    }
+    return resultList
 }
